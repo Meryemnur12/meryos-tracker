@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#322561" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .weekly-card,.cloud-settings{padding:20px;margin-bottom:14px}.weekly-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.weekly-detail{padding:13px;border-radius:12px;background:#faf9ff;border:1px solid var(--line)}.weekly-detail strong,.weekly-detail span{display:block}.weekly-detail span{font-size:.82rem;color:var(--muted);margin-bottom:7px}.weekly-detail small{display:block;margin-top:5px}.cloud-settings{border:1px solid var(--line);border-radius:14px;background:#fcfbff}.cloud-settings h3{margin-bottom:6px}.cloud-settings details{padding:12px;background:var(--lav);border-radius:11px}.cloud-settings summary{cursor:pointer;font-weight:750;color:var(--purple)}.cloud-settings details label{display:block;margin-top:12px;font-weight:700;font-size:.9rem}.cloud-settings details input{width:100%;margin-top:6px}.auth-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}.auth-form label{font-weight:700;font-size:.9rem}.auth-form input{display:block;width:100%;margin-top:6px}.auth-form .form-actions{grid-column:1/-1}.cloud-settings>small{display:block;margin-top:12px;color:var(--muted)}@media(max-width:620px){.weekly-details,.auth-form{grid-template-columns:1fr}}
+  </style>
+  <title>Meryoş Tracker</title>
+</head>
+<body>
+  <header>
+    <div><p class="eyebrow">KİŞİSEL ÇALIŞMA ALANI</p><h1>Meryoş Tracker ✦</h1></div>
+    <div class="header-actions"><button id="notifyBtn" class="ghost">🔔 Hatırlatıcıyı aç</button><button id="installBtn" hidden>Uygulamayı yükle</button></div>
+  </header>
+  <main>
+    <section class="hero card">
+      <div><p id="today" class="eyebrow"></p><h2>Bugünün odağı</h2><p class="muted">Küçük ve tutarlı adımlar, büyük ilerleme yaratır.</p></div>
+      <div class="progress-ring"><strong id="todayProgress">0%</strong><span>tamamlandı</span></div>
+    </section>
+
+    <nav class="tabs" aria-label="Sayfalar">
+      <button class="tab active" data-page="todayPage">Bugün</button>
+      <button class="tab" data-page="reportPage">Günlük rapor</button>
+      <button class="tab" data-page="insightsPage">İlerleme</button>
+      <button class="tab" data-page="settingsPage">Ayarlar</button>
+    </nav>
+
+    <section id="todayPage" class="page active">
+      <div class="section-head"><div><h2>Çalışma programın</h2><p class="muted">Görev ekle, bitirdikçe işaretle.</p></div><button id="addTaskBtn">＋ Görev ekle</button></div>
+      <div id="taskList" class="task-list"></div>
+      <form id="taskForm" class="add-form" hidden>
+        <input id="taskTitle" required maxlength="100" placeholder="Örn. Problemler: 25 soru" />
+        <select id="taskArea"><option>DGS</option><option>Üniversite</option><option>İngilizce</option><option>Siber Güvenlik</option></select>
+        <input id="taskMinutes" type="number" min="1" max="600" value="45" aria-label="Dakika" />
+        <button type="submit">Ekle</button><button type="button" id="cancelTaskBtn" class="ghost">Vazgeç</button>
+      </form>
+      <div class="tip card"><span>💡</span><p><strong>Akşam rutini:</strong> Gün sonunda “Günlük rapor” sekmesine geçip nelerin iyi gittiğini kaydet.</p></div>
+    </section>
+
+    <section id="reportPage" class="page">
+      <div class="section-head"><div><h2>Günlük rapor</h2><p class="muted">Bugünü kapat ve raporunu ChatGPT’ye hazırla.</p></div></div>
+      <form id="reportForm" class="report-form card">
+        <label>Bugün en iyi yaptığım şey<textarea id="win" maxlength="500" placeholder="Kısa bir başarı notu..."></textarea></label>
+        <label>Eksik kalanlar / engeller<textarea id="blocker" maxlength="500" placeholder="Yarın için notlar..."></textarea></label>
+        <label>Enerji seviyem <span id="energyValue">3</span>/5<input id="energy" type="range" min="1" max="5" value="3" /></label>
+        <label>Yarın için önceliğim<textarea id="tomorrow" maxlength="500" placeholder="En önemli tek iş..."></textarea></label>
+        <div class="form-actions"><button type="submit">Raporu kaydet</button><button type="button" id="copyReport" class="ghost">📋 Kopyala</button><button type="button" id="openChatGPT" class="ghost">✦ ChatGPT'de aç</button></div>
+      </form>
+      <p id="reportStatus" class="status" role="status"></p>
+    </section>
+
+    <section id="insightsPage" class="page">
+      <div class="section-head"><div><h2>İlerlemen</h2><p class="muted">Kaydedilmiş günlük raporlarından oluşur.</p></div></div>
+      <div class="stats"><article class="card"><span>Bu hafta</span><strong id="weekMinutes">0 dk</strong><small id="weekTasks">0 tamamlanan görev</small></article><article class="card"><span>Bu ay</span><strong id="monthMinutes">0 dk</strong><small id="monthTasks">0 tamamlanan görev</small></article><article class="card"><span>Rapor serisi</span><strong id="streak">0 gün</strong><small>art arda günlük rapor</small></article></div>
+      <article class="card area-card"><h3>Alanlara göre bu hafta</h3><div id="areaStats" class="area-stats"></div></article>
+      <article class="card weekly-card"><div class="section-head"><div><h3>Haftalık değerlendirme</h3><p class="muted">Tamamlanan görev, süre ve tamamlama oranı ayrı ayrı gösterilir.</p></div><button id="copyWeeklyReport" class="ghost">📋 Değerlendirmeyi kopyala</button></div><div id="weeklyDetails" class="weekly-details"></div></article>
+      <article class="card"><h3>Son raporlar</h3><div id="reportHistory" class="history"></div></article>
+    </section>
+
+    <section id="settingsPage" class="page">
+      <div class="section-head"><div><h2>Hatırlatıcılar ve veri</h2><p class="muted">Tarayıcı kapalıyken bildirimler için ileride sunucu veya otomasyon gerekir.</p></div></div>
+      <div class="card settings"><label>Günlük plan saati<input id="planTime" type="time" value="09:00" /></label><label>Akşam rapor saati<input id="reportTime" type="time" value="21:00" /></label><button id="saveSettings">Ayarları kaydet</button><hr /><section class="schedule-settings"><h3>Haftalık otomatik program</h3><p class="muted">Her gün ilk açılışta o güne ait görevler otomatik eklenir. Her satırı <strong>Alan | Görev | dakika</strong> biçiminde düzenleyebilirsin.</p><div id="scheduleEditor" class="schedule-editor"></div><button id="saveSchedule">Haftalık programı kaydet</button><p id="scheduleStatus" class="status" role="status"></p></section><hr /><section class="cloud-settings"><h3>Bulut senkronizasyonu</h3><p class="muted">Ücretsiz Supabase projesiyle aynı hesaba bağlı telefon ve bilgisayarını eşitle. Bağlantı kurulana kadar verilerin yalnızca bu cihazda kalır.</p><p id="cloudStatus" class="status" role="status">Bulut bağlantısı yapılandırılmadı.</p><details><summary>Supabase bağlantı bilgileri</summary><label>Proje URL'si<input id="supabaseUrl" type="url" placeholder="https://ornek.supabase.co" autocomplete="off" /></label><label>Publishable / anon anahtarı<input id="supabaseKey" type="password" placeholder="sb_publishable_..." autocomplete="off" /></label><label>VAPID genel anahtarı <small>(kapalıyken bildirim için)</small><input id="vapidPublicKey" type="text" placeholder="VAPID public key" autocomplete="off" /></label><button id="saveCloudConfig" type="button">Bağlantıyı kaydet</button></details><form id="authForm" class="auth-form"><label>E-posta<input id="authEmail" type="email" required autocomplete="email" /></label><label>Parola<input id="authPassword" type="password" required minlength="8" autocomplete="current-password" /></label><div class="form-actions"><button id="signUp" type="button" class="ghost">Hesap oluştur</button><button id="signIn" type="submit">Giriş yap</button><button id="signOut" type="button" class="ghost" hidden>Çıkış yap</button></div></form><div class="form-actions"><button id="syncNow" type="button" class="ghost">↻ Şimdi eşitle</button><button id="enablePush" type="button" class="ghost">🔔 Kapalıyken bildirimi etkinleştir</button><button id="cloudBackup" type="button" class="ghost">☁ Bulut yedeği oluştur</button></div><small>Bildirimler için HTTPS ile yayımlanmış uygulama, izin, VAPID anahtarı ve dağıtılmış sunucu işlevi gerekir.</small></section><hr /><section><h3>Yerel yedek</h3><p class="muted">Her değişiklikte bu cihazda bir geri yükleme kopyası da tutulur. İndirilen JSON dosyası cihaz kaybına karşı ek koruma sağlar.</p><button id="exportData" class="ghost">Verilerimi indir</button><label class="import-label">Veri geri yükle<input id="importData" type="file" accept="application/json" /></label></section></div>
+    </section>
+  </main>
+  <template id="taskTemplate"><article class="task card"><label class="check"><input type="checkbox" /><span class="checkmark"></span></label><div class="task-copy"><strong></strong><span></span></div><button class="delete" title="Görevi sil">×</button></article></template>
+  <script src="cloud.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

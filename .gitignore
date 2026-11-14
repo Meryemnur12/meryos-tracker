@@ -1,0 +1,8 @@
+# Never commit Supabase, VAPID, or deployment secrets.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+vapid*.json
+supabase/.env*
