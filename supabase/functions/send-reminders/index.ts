@@ -29,7 +29,10 @@ Deno.serve(async request => {
   const results = [];
   for (const subscription of subscriptions || []) {
     const now = localClock(subscription.timezone || 'Europe/Istanbul');
-    const kind = isTest ? 'test' : now.time === subscription.plan_time && subscription.last_plan_sent !== now.date ? 'plan' : now.time === subscription.report_time && subscription.last_report_sent !== now.date ? 'report' : null;
+    // Postgres time values are returned as HH:MM:SS, while the reminder clock is HH:MM.
+    const planTime = String(subscription.plan_time || '').slice(0, 5);
+    const reportTime = String(subscription.report_time || '').slice(0, 5);
+    const kind = isTest ? 'test' : now.time === planTime && subscription.last_plan_sent !== now.date ? 'plan' : now.time === reportTime && subscription.last_report_sent !== now.date ? 'report' : null;
     if (!kind) continue;
     try {
       await send(subscription, kind === 'test'
