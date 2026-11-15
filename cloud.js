@@ -58,7 +58,9 @@ window.MeryosCloud = (() => {
     const rows = await request(`/rest/v1/tracker_state?user_id=eq.${userId}&select=data,updated_at`, { method: 'GET' }, active.access_token);
     const remote = rows?.[0];
     const localUpdated = Date.parse(localState.updatedAt || 0) || 0;
-    const remoteUpdated = Date.parse(remote?.updated_at || remote?.data?.updatedAt || 0) || 0;
+    // Prefer the state timestamp: the database timestamp is necessarily a little later
+    // than a successful upload and must not make the same device's data look stale.
+    const remoteUpdated = Date.parse(remote?.data?.updatedAt || remote?.updated_at || 0) || 0;
     if (remote && remoteUpdated > localUpdated) { setStatus('Daha yeni bulut verisi bu cihaza alındı.'); return { source: 'remote', data: remote.data }; }
     await request('/rest/v1/tracker_state?on_conflict=user_id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: active.user.id, data: localState, updated_at: localState.updatedAt }) }, active.access_token);
     setStatus('Bulut eşitlemesi tamamlandı.');
