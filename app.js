@@ -109,7 +109,19 @@ function bindCloudControls() {
   $('#cloudBackup').onclick = async () => { try { await MeryosCloud.createBackup(state); } catch (error) { $('#cloudStatus').textContent = error.message; } };
   $('#enablePush').onclick = async () => { try { await MeryosCloud.enablePush(state.settings); } catch (error) { $('#cloudStatus').textContent = error.message; } };
 }
-async function syncNow() { try { const result = await MeryosCloud.sync(state); if (result.source === 'remote') applyRemoteState(result.data); } catch (error) { $('#cloudStatus').textContent = error.message; } }
+async function syncNow() {
+  const button = $('#syncNow');
+  button.disabled = true;
+  $('#cloudStatus').textContent = 'Bulutla eşitleniyor…';
+  try {
+    const result = await MeryosCloud.sync(state);
+    if (result.source === 'remote') applyRemoteState(result.data);
+  } catch (error) {
+    $('#cloudStatus').textContent = `Eşitleme hatası: ${error.message}`;
+  } finally {
+    button.disabled = false;
+  }
+}
 document.addEventListener('visibilitychange', () => { if (!document.hidden && MeryosCloud?.session()) syncNow(); });
 setInterval(() => { if (!document.hidden && MeryosCloud?.session()) syncNow(); }, 30_000);
 let installPrompt; window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); installPrompt = event; $('#installBtn').hidden = false; }); $('#installBtn').onclick = async () => { installPrompt?.prompt(); await installPrompt?.userChoice; $('#installBtn').hidden = true; };
