@@ -14,8 +14,9 @@ window.MeryosCloud = (() => {
   function authHeaders(token) { return { apikey: config.key, Authorization: `Bearer ${token || config.key}`, 'Content-Type': 'application/json' }; }
   async function request(path, options = {}, token) {
     const response = await fetch(`${baseUrl()}${path}`, { ...options, headers: { ...authHeaders(token), ...(options.headers || {}) } });
-    if (!response.ok) { const detail = await response.text(); throw new Error(detail || `İstek başarısız (${response.status})`); }
-    return response.status === 204 ? null : response.json();
+    const body = await response.text();
+    if (!response.ok) throw new Error(body || `İstek başarısız (${response.status})`);
+    return body ? JSON.parse(body) : null;
   }
   async function validSession() {
     if (!session) return null;
