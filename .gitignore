@@ -5,4 +5,5 @@
 *.pem
 *.key
 vapid*.json
+vapid-keys.txt
 supabase/.env*
