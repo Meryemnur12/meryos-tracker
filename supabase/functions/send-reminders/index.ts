@@ -23,19 +23,24 @@ async function send(subscription: Record<string, string>, payload: Record<string
 
 Deno.serve(async request => {
   if (!Deno.env.get('CRON_SECRET') || request.headers.get('x-cron-secret') !== Deno.env.get('CRON_SECRET')) return new Response('Unauthorized', { status: 401 });
+  const isTest = new URL(request.url).searchParams.get('test') === '1';
   const { data: subscriptions, error } = await supabase.from('push_subscriptions').select('*');
   if (error) return Response.json({ error: error.message }, { status: 500 });
   const results = [];
   for (const subscription of subscriptions || []) {
     const now = localClock(subscription.timezone || 'Europe/Istanbul');
-    const kind = now.time === subscription.plan_time && subscription.last_plan_sent !== now.date ? 'plan' : now.time === subscription.report_time && subscription.last_report_sent !== now.date ? 'report' : null;
+    const kind = isTest ? 'test' : now.time === subscription.plan_time && subscription.last_plan_sent !== now.date ? 'plan' : now.time === subscription.report_time && subscription.last_report_sent !== now.date ? 'report' : null;
     if (!kind) continue;
     try {
-      await send(subscription, kind === 'plan'
+      await send(subscription, kind === 'test'
+        ? { title: 'Meryoş Tracker test bildirimi', body: 'Kapalıyken bildirim altyapısı yanıt verdi. ✦', tag: 'meryos-test' }
+        : kind === 'plan'
         ? { title: 'Meryoş Tracker: günaydın ✦', body: 'Bugünün çalışma programını gözden geçirme zamanı.', tag: 'meryos-plan' }
         : { title: 'Meryoş Tracker: günü kapat', body: 'Günlük çalışma raporunu kaydetmeyi unutma.', tag: 'meryos-report' });
-      const column = kind === 'plan' ? 'last_plan_sent' : 'last_report_sent';
-      await supabase.from('push_subscriptions').update({ [column]: now.date }).eq('endpoint', subscription.endpoint);
+      if (kind !== 'test') {
+        const column = kind === 'plan' ? 'last_plan_sent' : 'last_report_sent';
+        await supabase.from('push_subscriptions').update({ [column]: now.date }).eq('endpoint', subscription.endpoint);
+      }
       results.push({ endpoint: subscription.endpoint, status: 'sent', kind });
     } catch (error) {
       results.push({ endpoint: subscription.endpoint, status: 'failed', error: String(error) });

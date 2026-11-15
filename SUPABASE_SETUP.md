@@ -74,6 +74,8 @@ Web push yalnız HTTPS altında çalışan, yüklenmiş PWA'larda ve kullanıcı
 
 Fonksiyon, kullanıcının seçtiği plan ve akşam rapor saatlerini `Europe/Istanbul` gibi cihaz saat diliminde kontrol eder. Beş dakikalık cron çözünürlüğü nedeniyle bildirim, hedef saatin bulunduğu beş dakika içinde gönderilir.
 
+Edge Function dağıtıldıktan ve en az bir cihaz abonelik oluşturduktan sonra cron saatini beklemeden test etmek için Dashboard → Edge Functions → `send-reminders` → **Test** bölümünde `POST` isteğini `?test=1` sorgu parametresi ve `x-cron-secret` başlığıyla gönder. Başarılı yanıtta `status: "sent"` görünür ve cihazda “Meryoş Tracker test bildirimi” çıkar.
+
 ## Test durumu
 
 - Yerel görev/rapor/haftalık değerlendirme/yedek testleri otomatik olarak geçti.
